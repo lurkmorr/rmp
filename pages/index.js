@@ -1,65 +1,142 @@
 import Head from 'next/head'
+import React from 'react'
 import styles from '../styles/Home.module.css'
+import axios from 'axios'
 
-export default function Home() {
-  return (
-    <div className={styles.container}>
-      <Head>
-        <title>Create Next App</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
+export default class Home extends React.Component {
 
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
+    state = {
+        rooms : []
+    }
 
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.js</code>
-        </p>
+    updateState = () => {
+        axios.get('http://localhost:3000/api/home/light-state').then(({data}) => {
+            this.setState({rooms : data.cfg.rooms})
+        }).catch()
+    }
 
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
+    interval = undefined
 
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
+    componentDidMount() {
+        this.updateState()
+        this.interval = setInterval(()=>{
+            this.updateState()
+        }, 1000)
+    }
 
-          <a
-            href="https://github.com/vercel/next.js/tree/master/examples"
-            className={styles.card}
-          >
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
+    componentWillUnmount() {
+        clearInterval(this.interval)
+    }
 
-          <a
-            href="https://vercel.com/import?filter=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h3>Deploy &rarr;</h3>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
-        </div>
-      </main>
+    changeLightState = (i, flag) => {
+        axios.post('http://localhost:3000/api/home/light-state/set-light-state', {i,flag}).then(({data}) => {
+            this.setState({rooms : data})
+        }).catch()
+    }
 
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <img src="/vercel.svg" alt="Vercel Logo" className={styles.logo} />
-        </a>
-      </footer>
-    </div>
-  )
+    changeInputIntensity = (i, value) => {
+        value = parseInt(value)
+        axios.post('http://localhost:3000/api/home/light-state/set-light-intensity', {i,value}).then(({data}) => {
+            this.setState({rooms : data})
+        }).catch()
+    }
+
+    onMinTempIncrement = (i) => {
+        const value = this.state.rooms[i].temperature.min + 1
+        axios.post('http://localhost:3000/api/home/room-state/set-min-temperature', {i,value}).then(({data}) => {
+            this.setState({rooms : data})
+        }).catch()
+    }
+
+    onMinTempDecrement = (i) => {
+        const value = this.state.rooms[i].temperature.min - 1
+        axios.post('http://localhost:3000/api/home/room-state/set-min-temperature', {i,value}).then(({data}) => {
+            this.setState({rooms : data})
+        }).catch()
+    }
+
+    onMaxTempIncrement = (i) => {
+        const value = this.state.rooms[i].temperature.max + 1
+        axios.post('http://localhost:3000/api/home/room-state/set-max-temperature', {i,value}).then(({data}) => {
+            this.setState({rooms : data})
+        }).catch()
+    }
+
+    onMaxTempDecrement = (i) => {
+        const value = this.state.rooms[i].temperature.max - 1
+        axios.post('http://localhost:3000/api/home/room-state/set-max-temperature', {i,value}).then(({data}) => {
+            this.setState({rooms : data})
+        }).catch()
+    }
+
+    render = () => {
+        return (
+            <div className={styles.container}>
+                <Head>
+                    <title>{'Сервер домашней автоматизации'}</title>
+                    <link rel="icon" href="/favicon.ico" />
+                </Head>
+                <header>
+                    <div className={styles.title}>
+                        <span>{'Управление системой умного дома'}</span>
+                    </div>
+                </header>
+                <main className={styles.roomWrapper}>
+                    {this.state.rooms.map((el, i) => {
+                        const {lightState, lightIntensity, title, temperature} = el
+                        const {value, max, min} = temperature
+                        return (
+                            <div className={styles.room} key={i}>
+                                <div className={styles.roomTitle}>
+                                    <span>{title}</span>
+                                </div>
+                                <div className={styles.light}>
+                                    <span>{'Свет'} {lightState ? 'включен': 'отключен'}</span>
+                                </div>
+                                <div className={styles.lightInput}>
+                                    <div className={styles.lightInputBg}  onClick={()=>{this.changeLightState(i, lightState)}}>
+                                        <div className={styles.lightInputFg} style={{marginLeft : lightState ? '30px' : '0px'}}/>
+                                    </div>
+                                </div>
+                                <div className={styles.light}>
+                                    <span>{'Яркость света'}</span>
+                                </div>
+                                <div className={styles.lightInputRange}>
+                                    <input type="range" min={0} max={100} value={lightIntensity} onChange={({target}) => {this.changeInputIntensity(i, target.value)}}/>
+                                    <span>{lightIntensity} %</span>
+                                </div>
+                                <div className={styles.temperature}>
+                                    <div>
+                                        <span>
+                                            {'Температура :'}
+                                        </span>
+                                    </div>
+                                    <div className={styles.temperatureValues}>
+                                        <div className={styles.temperatureValue}>
+                                            <span>{'Минимальная :'} {min}</span>
+                                            <div className={styles.temperatureValueButtons}>
+                                                <button onClick={()=>{this.onMinTempIncrement(i)}}>{'+'}</button>
+                                                <button onClick={()=>{this.onMinTempDecrement(i)}}>{'-'}</button>
+                                            </div>
+                                        </div>
+                                        <div className={styles.temperatureValue}>
+                                            <span>{'Максимальная :'} {max}</span>
+                                            <div className={styles.temperatureValueButtons}>
+                                                <button onClick={()=>{this.onMaxTempIncrement(i)}}>{'+'}</button>
+                                                <button onClick={()=>{this.onMaxTempDecrement(i)}}>{'-'}</button>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <span>{'Текущая :'} {value}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )
+                    })}
+                </main>
+            </div>
+        )
+    }
+
 }

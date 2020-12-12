@@ -120,3 +120,94 @@
     flex-direction: column;
   }
 }
+
+.roomWrapper {
+  display: grid;
+  grid-template-columns: repeat(2, 300px);
+  grid-auto-rows: 300px;
+  grid-gap: 15px;
+  margin-top: 20px;
+}
+
+.room {
+  height: 300px;
+  width: 300px;
+  box-sizing: border-box;
+  border: 2px solid black;
+  padding: 5px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.roomTitle {
+  font-size: 20px;
+}
+
+.light {
+  font-size: 16px;
+}
+
+.lightInput {
+  height: 20px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lightInputBg {
+  width: 50px;
+  height: 20px;
+  background-color: #94cbff;
+  border-radius: 20px;
+}
+
+.lightInputFg {
+  width: 20px;
+  height: 20px;
+  border-radius: 20px;
+  background-color: black;
+  transition: margin-left 0.3s ease-out;
+}
+
+.lightInputRange {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 250px;
+}
+
+.temperature {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.temperatureValues {
+  width: 100%;
+}
+
+.temperatureValues div {
+  height: 30px;
+  margin-top: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
+
+.temperatureValueButtons {
+  width: 70px;
+  display: flex;
+}
+
+.temperatureValueButtons button {
+  height: 30px;
+  width: 30px;
+}
+
+.temperatureValue {
+  width: 250px;
+}
