@@ -6,6 +6,5 @@ export default (req, res) => {
         cfg.rooms[i].lightState = !flag
         res.statusCode = 200
         res.json(cfg.rooms)
-        console.log(cfg.rooms[i])
     }
 }
